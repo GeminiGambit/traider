@@ -3,6 +3,19 @@ import csv
 import os
 
 cwd = os.getcwd()
+symbols_url = "http://www.nasdaq.com/screening/companies-by-industry.aspx?exchange=NASDAQ&render=download"
+
+def update_symbols_list_online():
+	os.system("start \"\" http://www.nasdaq.com/screening/companies-by-industry.aspx?exchange=NASDAQ&render=download")
+
+def extract_symbols_list(symbols_file,symbols):
+	with open(symbols_file,'r') as sf:
+		sf.readline()
+		lines = sf.readlines()
+		for line in lines:
+			line = line.split(",")
+			symbols.append(line[0].strip('"'))
+	print "Retrieved %d symbols from %s\n" % (len(symbols), symbols_url)
 
 def symbol_to_path(symbol,timeframe):
 	path = os.path.join(cwd,"data/%s/%s.csv"%(timeframe,symbol))
@@ -33,12 +46,18 @@ def get_daily_data(ts, symbols):
 			writer.writerows(csvdata)
 
 if __name__ == "__main__":
-	print "Data acquisition \n Current working dir: %s\n"%cwd
+	print "Data acquisition\nCurrent working dir: %s\n"%cwd
+	data_dir = os.path.join(cwd,"data/")
+	if not os.path.isdir(data_dir):
+		os.mkdir(data_dir)
+
+	print "Updating symbols list"
+	symbols=[]
+	#get_symbols_list_online()
+	symbols_file = os.path.join(cwd, "symbols.csv")
+	extract_symbols_list(symbols_file, symbols)
 
 	ts = Ts(key='MH4A705KCOPRMBUB', output_format='csv',indexing_type='date')
-	print "Targetted symbols:\n"
-	symbols = ['AAPL','GOOG','MSFT','CSCO']
-	print symbols
 	print "Getting intraday data"
 	get_intraday_data(ts, symbols)
 	print "Getting daily data"

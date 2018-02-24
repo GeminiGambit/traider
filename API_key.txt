@@ -1,2 +1,2 @@
-Alpha Vantage API key: 
-MH4A705KCOPRMBUB
+Alpha_Vantage_API_Key MH4A705KCOPRMBUB
+Nasdaq_symbol_list_url http://www.nasdaq.com/screening/companies-by-industry.aspx?exchange=NASDAQ&render=download
