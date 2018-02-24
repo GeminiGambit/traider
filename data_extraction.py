@@ -1,12 +1,21 @@
 from alpha_vantage.timeseries import TimeSeries as Ts
 import csv
 import os
+import requests
+import tqdm
 
 cwd = os.getcwd()
 symbols_url = "http://www.nasdaq.com/screening/companies-by-industry.aspx?exchange=NASDAQ&render=download"
 
 def update_symbols_list_online():
-	os.system("start \"\" http://www.nasdaq.com/screening/companies-by-industry.aspx?exchange=NASDAQ&render=download")
+	try:
+		response = requests.get(symbols_url, stream=True)
+		with open(os.path.join(cwd,"Newlist.csv"),"w") as sf:
+			for data in tqdm(response.iter_content()):
+				sf.write(data)
+	except:
+			print "HTTP request for updating symbols list has failed"
+			print "Try updating later"
 
 def extract_symbols_list(symbols_file,symbols):
 	with open(symbols_file,'r') as sf:
@@ -30,9 +39,13 @@ def get_intraday_data(ts, symbols):
 	for symbol in symbols:
 		with open(symbol_to_path(symbol,'intraday'),'w') as fp:
 			writer = csv.writer(fp)
-			data, meta_data = ts.get_intraday(symbol= symbol, interval='1min', outputsize='full')
-			csvdata=list(data)
-			writer.writerows(csvdata)	
+			try:
+				data, meta_data = ts.get_intraday(symbol= symbol, interval='1min', outputsize='full')
+				csvdata=list(data)
+				writer.writerows(csvdata)
+			except requests.exceptions.ConnectionError as e:
+				print "HTTP request for symbol %s has failed, %s" %(symbol, e)
+				continue
 
 def get_daily_data(ts, symbols):
 	daily_dir = os.path.join(cwd,"data/daily")
@@ -41,9 +54,13 @@ def get_daily_data(ts, symbols):
 	for symbol in symbols:
 		with open(symbol_to_path(symbol,'daily'),'w') as fp:
 			writer = csv.writer(fp)
-			data, meta_data = ts.get_daily(symbol= symbol, outputsize='full')
-			csvdata=list(data)
-			writer.writerows(csvdata)
+			try:
+				data, meta_data = ts.get_daily(symbol= symbol, outputsize='full')
+				csvdata=list(data)
+				writer.writerows(csvdata)
+			except requests.exceptions.ConnectionError as e:
+				print "HTTP request for symbol %s has failed, %s" %(symbol, e)
+				continue
 
 if __name__ == "__main__":
 	print "Data acquisition\nCurrent working dir: %s\n"%cwd
@@ -53,11 +70,16 @@ if __name__ == "__main__":
 
 	print "Updating symbols list"
 	symbols=[]
-	#get_symbols_list_online()
+	update_symbols_list_online()
 	symbols_file = os.path.join(cwd, "symbols.csv")
 	extract_symbols_list(symbols_file, symbols)
 
-	ts = Ts(key='MH4A705KCOPRMBUB', output_format='csv',indexing_type='date')
+	try:
+		ts = Ts(key='MH4A705KCOPRMBUB', output_format='csv',indexing_type='date')
+	finally:
+		"Alpha_Vantage TimeSeries call denied. Exiting"
+		exit
+
 	print "Getting intraday data"
 	get_intraday_data(ts, symbols)
 	print "Getting daily data"
