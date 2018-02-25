@@ -1,0 +1,106 @@
+#!/bin/bash
+
+CLEAN=0
+INSTALL_EXTERNAL=0
+UPDATE_SYMBOLS_LIST=0
+INTRA=0
+DAILY=0
+FULL=0
+LOG_LEVEL=0
+LAUNCH_STRING=""
+
+function print_help() {
+echo "
+This program manages the training data acquisition for traider using the alpha_vantage API.
+Ubuntu 16.10, python 2.7.14 and Anaconda Command line Client 1.6.9 are necessary.
+Also ensure pip is present.
+Other dependencies can be installed on the first run if requested.
+Options:
+-h | --help
+	prints this help
+-c | --clean
+	cleans current database.
+-I | --install-external-dependencies
+	install external packages, only to be done once
+-s | --update-symbols-list
+	request an updated symbols list from Nasdaq. Needed very occasionnally
+-i | --intra
+	request intraday data only
+-d | --daily
+	request daily data only
+-f | --full
+	request all time formats available
+-l | --log
+	specifies log level, info by default"
+}
+
+function main() {
+
+	until [ -z "$1" ]
+	do
+		case "$1" in
+			-c | --clean)
+				CLEAN=1
+				shift;;
+			-I | --install-external-dependencies)
+				INSTALL_EXTERNAL=1
+				shift;;
+			-s | --update-symbols-list)
+				UPDATE_SYMBOLS_LIST=1
+				shift;;
+			-i | --intra)
+				INTRA=1
+				shift;;
+			-d | --daily)
+				DAILY=1
+				shift;;
+			-f | full)
+				FULL=1
+				shift;;
+			-l | --log)
+				LOG_LEVEL=1
+				shift;;
+			-h | --help)
+				print_help
+				exit 1;;
+			*)
+				print_help
+				echo "unknown option $1"
+				exit 1;;
+		esac
+	done
+
+	if [ "$CLEAN" = "1" ] ; then
+		echo "Cleaning existing database."
+		rm -r data/
+		exit 1
+	fi
+
+	if  [ "$INSTALL_EXTERNAL" = "1" ] ; then
+		echo "Installing dependencies"
+		pip install alpha_vantage
+		pip install tqdm
+	fi
+
+	if [ "$INTRA" = "1" -o "$DAILY" = "1" -o "$FULL" = "1" ] ; then
+		LAUNCH_STRING="python data_extraction.py "
+		if [ "$UPDATE_SYMBOLS_LIST" = "1" ] ; then
+			LAUNCH_STRING+="--update-symbols-list "
+		fi
+		LAUNCH_STRING+="--data-type "
+		if [ "$FULL" = "1" ] ; then
+			LAUNCH_STRING+="full"
+		else
+			if [ "$INTRA" = "1" ] ; then
+				LAUNCH_STRING+="intra"
+			else
+				LAUNCH_STRING+="daily"
+			fi
+		fi
+		echo "$LAUNCH_STRING"
+		eval $LAUNCH_STRING
+	fi
+
+}
+
+main "$@"

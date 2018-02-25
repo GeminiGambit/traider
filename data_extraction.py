@@ -1,4 +1,6 @@
 from alpha_vantage.timeseries import TimeSeries as Ts
+import argparse as Ap
+import sys
 import csv
 import os
 import requests
@@ -7,13 +9,29 @@ import tqdm
 cwd = os.getcwd()
 symbols_url = "http://www.nasdaq.com/screening/companies-by-industry.aspx?exchange=NASDAQ&render=download"
 
+class CmdLineArgs:
+	def __init__(self, usl, dt):
+		self.usl = False
+		self.dt = 'full'
+cargs = CmdLineArgs(False,'full')
+
+def parse_cmdline():
+	parser = Ap.ArgumentParser()
+	parser.add_argument('--update-symbols-list',action='store_true')
+	parser.add_argument('--data-type',type=str,nargs=1,choices=['intra','daily','full'],default='full')
+	args = parser.parse_args()
+	cargs.usl = args.update_symbols_list
+	cargs.dt = args.data_type[0]
+
 def update_symbols_list_online():
 	try:
 		response = requests.get(symbols_url, stream=True)
-		with open(os.path.join(cwd,"Newlist.csv"),"w") as sf:
+		tmpfile = os.path.join(cwd,"Newlist.csv")
+		with open(tmpfile,"w") as sf:
 			for data in tqdm(response.iter_content()):
 				sf.write(data)
 	except:
+			os.remove(tmpfile)
 			print "HTTP request for updating symbols list has failed"
 			print "Try updating later"
 
@@ -64,15 +82,18 @@ def get_daily_data(ts, symbols):
 
 if __name__ == "__main__":
 	print "Data acquisition\nCurrent working dir: %s\n"%cwd
+	print "Parsing command line\n"
+	parse_cmdline()
 	data_dir = os.path.join(cwd,"data/")
 	if not os.path.isdir(data_dir):
 		os.mkdir(data_dir)
 
-	print "Updating symbols list"
-	symbols=[]
-	update_symbols_list_online()
-	symbols_file = os.path.join(cwd, "symbols.csv")
-	extract_symbols_list(symbols_file, symbols)
+	if cargs.usl:
+		print "Updating symbols list"
+		update_symbols_list_online()
+		#symbols_file = os.path.join(cwd, "symbols.csv")
+		#extract_symbols_list(symbols_file, symbols)
+	symbols=["MSFT","AAPL","GOOG"]
 
 	try:
 		ts = Ts(key='MH4A705KCOPRMBUB', output_format='csv',indexing_type='date')
@@ -80,7 +101,9 @@ if __name__ == "__main__":
 		"Alpha_Vantage TimeSeries call denied. Exiting"
 		exit
 
-	print "Getting intraday data"
-	get_intraday_data(ts, symbols)
-	print "Getting daily data"
-	get_daily_data(ts, symbols)
+	if cargs.dt == 'intra' or cargs.dt == 'full':
+		print "Getting intraday data"
+		get_intraday_data(ts, symbols)
+	if cargs.dt == 'daily' or cargs.dt == 'full':
+		print "\nGetting daily data"
+		get_daily_data(ts, symbols)
