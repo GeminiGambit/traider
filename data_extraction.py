@@ -10,10 +10,10 @@ cwd = os.getcwd()
 symbols_url = "http://www.nasdaq.com/screening/companies-by-industry.aspx?exchange=NASDAQ&render=download"
 
 class CmdLineArgs:
-	def __init__(self, usl, dt):
+	def __init__(self):
 		self.usl = False
 		self.dt = 'full'
-cargs = CmdLineArgs(False,'full')
+cargs = CmdLineArgs()
 
 def parse_cmdline():
 	parser = Ap.ArgumentParser()

@@ -78,6 +78,7 @@ function main() {
 
 	if  [ "$INSTALL_EXTERNAL" = "1" ] ; then
 		echo "Installing dependencies"
+		pip install tensorflow
 		pip install alpha_vantage
 		pip install tqdm
 	fi
