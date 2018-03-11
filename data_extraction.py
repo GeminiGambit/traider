@@ -88,12 +88,14 @@ if __name__ == "__main__":
 	if not os.path.isdir(data_dir):
 		os.mkdir(data_dir)
 
+	symbols = []
 	if cargs.usl:
 		print "Updating symbols list"
 		update_symbols_list_online()
-		#symbols_file = os.path.join(cwd, "symbols.csv")
-		#extract_symbols_list(symbols_file, symbols)
-	symbols=["MSFT","AAPL","GOOG"]
+
+	symbols_file = os.path.join(cwd, "symbols.csv")
+	extract_symbols_list(symbols_file, symbols)
+	#symbols=["MSFT","AAPL","GOOG"]
 
 	try:
 		ts = Ts(key='MH4A705KCOPRMBUB', output_format='csv',indexing_type='date')

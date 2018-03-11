@@ -9,10 +9,8 @@ class PortFolio:
 		self.symbols_space = []
 		self.target_assets = []
 	
-	def get_mean_target(self):
-		return (self.wallet.investment_funds * 0.01)
+	def get_max_price(self):
+		return (self.wallet.investment_funds * 0.02)
 	
 	def stock_selector(self, mean):
 		df_target_assets = pd.DataFrame()
-		
-	
