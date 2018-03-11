@@ -11,7 +11,7 @@ class TimeHandler:
 
 	def __init__(self, timeframe = timeframe):
 		inittime = DT.datetime.now()
-		self.startdate = "%d-01-01" % (inittime.year)
+		self.startdate = "%d-01-01 %d:%d:00" % (inittime.year, self.starttime.hour, self.starttime.minute)
 		self.enddate = inittime
 		self.datetimes = PD.date_range(self.startdate, self.enddate, freq='T')
 

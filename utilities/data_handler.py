@@ -37,7 +37,7 @@ class DataHandler:
 	def get_dataframe_for_symbol(self,symbol,column):
 		print "\nAttempting to read %s"%self.symbol_to_path(symbol)
 		try:
-			dataframe = PD.read_csv(self.symbol_to_path(symbol), na_values=NP.nan, usecols=['timestamp',column], engine='c', verbose=True)
+			dataframe = PD.read_csv(self.symbol_to_path(symbol), na_values=NP.nan, usecols=['timestamp',column], engine='c', verbose=False)
 			print "dataframe %d %d"% (dataframe.shape[0], dataframe.shape[1])
 			return dataframe
 
