@@ -77,7 +77,14 @@ function main() {
 	fi
 
 	if  [ "$INSTALL_EXTERNAL" = "1" ] ; then
+		echo "Make sure python 2.7 and pip are already installed!"
+		echo "You can check for python by typing: apt-cache policy python"
+		echo "Pip should be present by default for python version >= 2.7.9"
+		echo "Just in case, download from https://bootstrap.pypa.io/get-pip.py"
+		echo "and run: python get-pip.py"
 		echo "Installing dependencies"
+		pip install pandas
+		pip install numpy
 		pip install tensorflow
 		pip install alpha_vantage
 		pip install tqdm
