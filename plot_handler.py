@@ -1,6 +1,6 @@
 '''Definition of the PlotHandler class'''
 
-import matplotlib as PLT
+import matplotlib.pyplot as PLT
 
 class PlotHandler:
 

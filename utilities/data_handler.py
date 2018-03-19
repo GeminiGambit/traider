@@ -23,6 +23,8 @@ class DataHandler:
 		self.target_symbols = []
 		self.within_range_dataframe_close = PD.DataFrame()
 		self.within_range_dataframe_volume = PD.DataFrame()
+		self.norm_close = PD.DataFrame()
+		self.norm_volume = PD.DataFrame()
 		self.data_threshold = 0
 
 	def extract_symbols_list(self):
@@ -93,5 +95,14 @@ class DataHandler:
 			self.within_range_dataframe_close = self.join_dataframes(self.within_range_dataframe_close, data_frame_close, 'close', symbol)
 			data_frame_volume = self.get_dataframe_for_symbol(symbol, 'volume')
 			self.within_range_dataframe_volume = self.join_dataframes(self.within_range_dataframe_volume, data_frame_volume, 'volume', symbol)
+
+	def fill_missing_values(self, dataframe):
+		#To avoid peeking into the future unless absolutely unavoidable, forward fill must come first
+		dataframe.fillna(method="ffill", inplace=True)
+		dataframe.fillna(method="bfill", inplace=True)
+		return dataframe
+
+	def normalize_dataframe(self, dataframe):
+		return dataframe/dataframe.ix[0]
 
 	

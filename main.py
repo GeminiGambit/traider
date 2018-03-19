@@ -10,15 +10,14 @@ import plot_handler as ph
 import technical_indicators as ti
 
 def main():
-	wallet1 = wt.Wallet(1000.0, 0.5)
+	wallet1 = wt.Wallet(100.0, 0.5)
 	portfolio = pf.PortFolio(wallet1)
-	print "target_asset set to %d %s\n" % (portfolio.get_max_price(), portfolio.wallet.currency)
+	print "target_asset set to %f %s\n" % (portfolio.get_max_price(), portfolio.wallet.currency)
 
 	plothandler = ph.PlotHandler()
 
 	datahandler = dh.DataHandler()
 	datahandler.extract_symbols_list()
-	#datahandler.symbols = ["MSFT","AAPL","GOOG","CSCO","VTVT","ZYNE","ZSAN","ZNGA"]
 
 	datahandler.get_symbols_within_range(portfolio.get_max_price())
 
@@ -28,9 +27,15 @@ def main():
 	datahandler.extract_sufficient_data_symbols()
 	print datahandler.target_symbols
 
-	#datahandler.get_dataframes()
+	datahandler.get_dataframes()
+	datahandler.fill_missing_values(datahandler.within_range_dataframe_close)
+	datahandler.fill_missing_values(datahandler.within_range_dataframe_volume)
+	datahandler.norm_close = datahandler.normalize_dataframe(datahandler.within_range_dataframe_close)
+	datahandler.norm_volume = datahandler.normalize_dataframe(datahandler.within_range_dataframe_volume)
 	print datahandler.within_range_dataframe_close
+	print datahandler.norm_close
 	print datahandler.within_range_dataframe_volume
+	print datahandler.norm_volume
 
 if __name__ == "__main__":
 	#print globals()
